@@ -27,19 +27,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  guard:
-    name: Require main
-    runs-on: ubuntu-latest
-    steps:
-      - name: Reject non-main deployment
-        run: |
-          if [ "$GITHUB_REF" != 'refs/heads/main' ]; then
-            echo 'Production deployments must run from main.'
-            exit 1
-          fi
-
   deploy:
-    needs: guard
+    # Production is main-only. The condition is structural, so a non-main
+    # dispatch cannot acquire Azure credentials or enter the reusable workflow.
+    if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
