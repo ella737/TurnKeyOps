@@ -170,6 +170,23 @@ jobs:
               missing=1
             fi
           done
+          if [[ "$UAT_EVIDENCE" == *"The Hubbsly TKO-0014 card URL"* ]] ||
+             [[ "$UAT_EVIDENCE" == *"record containing the approved"* ]] ||
+             [[ "$UAT_EVIDENCE" == *"not-required-for-"* ]] ||
+             [[ "$UAT_EVIDENCE" == *"placeholder"* ]]; then
+            echo "UAT_EVIDENCE must be a real approved UAT URL or record identifier, not placeholder text"
+            missing=1
+          fi
+          if [[ "$ROLLBACK_REFERENCE" == "staging-uses-latest-healthy" ]] ||
+             [[ "$ROLLBACK_REFERENCE" == *"placeholder"* ]]; then
+            echo "ROLLBACK_REFERENCE must identify an approved healthy run, artifact, or commit"
+            missing=1
+          fi
+          if [[ "$SHIP_RELEASE_ID" == "automatic-staging" ]] ||
+             [[ "$SHIP_RELEASE_ID" == *"placeholder"* ]]; then
+            echo "SHIP_RELEASE_ID must identify the real Ship release"
+            missing=1
+          fi
           exit "$missing"
 
       - name: Sign in to Azure with workload identity federation

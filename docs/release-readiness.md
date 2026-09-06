@@ -63,6 +63,8 @@ Each environment must define these non-secret variables:
 - `API_BASE_URL`
 - `WEB_BASE_URL`
 
+> **Architecture guard:** `WEB_WEBAPP_NAME` currently names the SvelteKit Node App Service used by `client/`. The client still contains server-rendered routes and uses `@sveltejs/adapter-node`; it is not an Azure Static Web App deployment target yet. Do not replace this with a Static Web App until the migration sequence in `docs/architecture-migration.md` is complete. The `admin/` application already uses `@sveltejs/adapter-static`, but it is a separate surface and is not deployed by this reusable workflow.
+
 | Setting | Meaning |
 | --- | --- |
 | `AZURE_RESOURCE_GROUP` | Resource group containing that environment's API and web App Services |
