@@ -1,5 +1,9 @@
 # TurnKeyOps GitHub Actions and Hubbsly Ship release contract
 
+The current production handoff, artifact hashes, deployment IDs, migration
+order, support matrix, observation window, and remaining signoffs are recorded
+in `docs/releases/turnkeyops-prod-580d9a6-20260907T043500Z.md`.
+
 ## Authoritative automation
 
 GitHub Actions is the only active CI/CD system for TurnKeyOps. Hubbsly Ship
