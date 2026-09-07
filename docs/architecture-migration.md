@@ -37,6 +37,32 @@ The browser applications own presentation and REST calls. Controllers own HTTP c
 - Bob conversations and operational actions
 - Think Pink settings and tenant workflow pages
 
+## Migration baseline
+
+The branded `client/` application currently contains **33** server route
+modules, **16** server-only libraries, and **17** modules that expose SvelteKit
+form actions. Those are the blockers to `@sveltejs/adapter-static`; an adapter
+change before they are removed would make the affected routes fail at runtime.
+
+The first implementation increments are deliberately ordered by blast radius:
+
+1. **Public intake:** move the BDR and Think Pink public quote forms and
+   attachment uploads to the existing anonymous API endpoints. Keep validation,
+   idempotency IDs, attachment limits, and user-visible retry states in the
+   browser.
+2. **Public content:** load public tenant content through the existing public
+   tenant-settings API, with a bundled safe fallback for initial render.
+3. **Authenticated reads and commands:** replace each admin page load/action
+   with browser API calls using the existing browser token store. Start with
+   isolated tenant settings and contact access, then move estimates, invoices,
+   jobs, and Bob.
+4. **Authentication:** replace the cookie/session hook and server OTP actions
+   with API-issued access and refresh tokens held by the browser client.
+
+Every increment must delete its corresponding `+page.server.ts`,
+`+layout.server.ts`, or `+server.ts` module, retain API authorization checks,
+and add browser-level coverage before the route is counted as migrated.
+
 ## Migration sequence
 
 1. Migrate quote requests and attachments to API services/repositories.
