@@ -72,7 +72,8 @@ dispatch inputs.
 
 Linux App Service ZIP deployment submits asynchronously with Azure CLI startup
 tracking disabled. The repository-owned smoke script is the authoritative
-readiness check and waits with bounded retries for the API and web surfaces.
+readiness check and waits up to five minutes by default for each API and web
+surface, with `SMOKE_MAX_ATTEMPTS` available for an explicit override.
 This avoids Azure CLI 504 false failures when Kudu finishes a OneDeploy package
 after the CLI request has timed out.
 
