@@ -278,6 +278,7 @@ jobs:
             --type zip \
             --clean true \
             --restart true \
+            --async true \
             --track-status false \
             --output json | tee "$RUNNER_TEMP/api-deployment.json"
 
@@ -312,6 +313,7 @@ jobs:
             --type zip \
             --clean true \
             --restart true \
+            --async true \
             --track-status false \
             --output json | tee "$RUNNER_TEMP/web-deployment.json"
 

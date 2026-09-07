@@ -44,6 +44,7 @@ az webapp deploy \
   --type zip \
   --clean true \
   --restart true \
+  --async true \
   --track-status false \
   --output json | tee "$evidence_dir/api-deployment.json"
 
@@ -54,6 +55,7 @@ az webapp deploy \
   --type zip \
   --clean true \
   --restart true \
+  --async true \
   --track-status false \
   --output json | tee "$evidence_dir/web-deployment.json"
 
