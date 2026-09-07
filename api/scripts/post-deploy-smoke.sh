@@ -11,12 +11,18 @@ fi
 
 api_base="${api_base%/}"
 web_base="${web_base%/}"
+max_attempts="${SMOKE_MAX_ATTEMPTS:-36}"
+
+if ! [[ "$max_attempts" =~ ^[1-9][0-9]*$ ]]; then
+  echo 'SMOKE_MAX_ATTEMPTS must be a positive integer.' >&2
+  exit 2
+fi
 
 retry_get() {
   local url="$1"
   local expected="$2"
   local attempt code
-  for attempt in {1..12}; do
+  for ((attempt = 1; attempt <= max_attempts; attempt += 1)); do
     code="$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --max-time 20 "$url" || true)"
     if [[ "$code" == "$expected" ]]; then
       echo "PASS $expected $url"

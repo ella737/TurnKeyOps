@@ -44,7 +44,7 @@ az webapp deploy \
   --type zip \
   --clean true \
   --restart true \
-  --track-status true \
+  --track-status false \
   --output json | tee "$evidence_dir/api-deployment.json"
 
 az webapp deploy \
@@ -54,7 +54,7 @@ az webapp deploy \
   --type zip \
   --clean true \
   --restart true \
-  --track-status true \
+  --track-status false \
   --output json | tee "$evidence_dir/web-deployment.json"
 
 SMOKE_API_BASE_URL="$api_base_url" \

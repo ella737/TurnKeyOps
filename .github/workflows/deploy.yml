@@ -278,7 +278,7 @@ jobs:
             --type zip \
             --clean true \
             --restart true \
-            --track-status true \
+            --track-status false \
             --output json | tee "$RUNNER_TEMP/api-deployment.json"
 
       - name: Deploy web package
@@ -312,7 +312,7 @@ jobs:
             --type zip \
             --clean true \
             --restart true \
-            --track-status true \
+            --track-status false \
             --output json | tee "$RUNNER_TEMP/web-deployment.json"
 
       - name: Run post-deployment smoke checks
