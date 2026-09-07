@@ -1,5 +1,9 @@
 # TurnKeyOps GitHub Actions and Hubbsly Ship release contract
 
+The current production handoff, artifact hashes, deployment IDs, migration
+order, support matrix, observation window, and remaining signoffs are recorded
+in `docs/releases/turnkeyops-prod-580d9a6-20260907T043500Z.md`.
+
 ## Authoritative automation
 
 GitHub Actions is the only active CI/CD system for TurnKeyOps. Hubbsly Ship
@@ -64,6 +68,24 @@ Each environment must define these non-secret variables:
 - `WEB_BASE_URL`
 
 > **Architecture guard:** `WEB_WEBAPP_NAME` currently names the SvelteKit Node App Service used by `client/`. The client still contains server-rendered routes and uses `@sveltejs/adapter-node`; it is not an Azure Static Web App deployment target yet. Do not replace this with a Static Web App until the migration sequence in `docs/architecture-migration.md` is complete. The `admin/` application already uses `@sveltejs/adapter-static`, but it is a separate surface and is not deployed by this reusable workflow.
+
+## Static admin release path
+
+`.github/workflows/deploy-admin-swa.yml` follows the Bed Brigade Static Web App
+release shape for the static-ready `admin/` surface only:
+
+- a push to `dev` deploys the admin bundle to the `staging` GitHub environment;
+- a manual dispatch from `main` deploys to the protected `production`
+  environment and requires a Hubbsly Ship release ID, UAT evidence, and rollback
+  reference;
+- both environments must provide `VITE_API_URL`, `DEPLOYMENT_URL`, and the
+  `AZURE_STATIC_WEB_APPS_API_TOKEN` secret;
+- the workflow builds the checked static bundle, carries
+  `staticwebapp.config.json` into the artifact directory, uploads that prebuilt
+  directory to Azure Static Web Apps, and requires a 200 smoke check.
+
+This workflow must not be used for `client/` until the architecture migration is
+complete.
 
 | Setting | Meaning |
 | --- | --- |

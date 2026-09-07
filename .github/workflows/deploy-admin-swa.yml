@@ -1,0 +1,116 @@
+name: Deploy TurnKeyOps Admin - Static Web App
+run-name: Deploy admin SWA · ${{ github.ref_name }} · ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+    inputs:
+      ship-release-id:
+        description: Hubbsly Ship release identifier (required for main/production)
+        required: false
+        type: string
+      uat-evidence:
+        description: Approved UAT record URL or identifier (required for main/production)
+        required: false
+        type: string
+      rollback-reference:
+        description: Previous healthy run, artifact, or commit (required for main/production)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: turnkeyops-admin-swa-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # `dev` is the automatic staging line. Production is deliberately a manual
+    # main-only dispatch so it can be protected by the GitHub environment.
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    name: Build, verify, and deploy admin
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    env:
+      CONFIGURED_API_URL: ${{ vars.VITE_API_URL }}
+      CONFIGURED_DEPLOYMENT_URL: ${{ vars.DEPLOYMENT_URL }}
+      SHIP_RELEASE_ID: ${{ inputs.ship-release-id || format('automatic-staging-{0}', github.run_id) }}
+      UAT_EVIDENCE: ${{ inputs.uat-evidence || 'not-required-for-staging' }}
+      ROLLBACK_REFERENCE: ${{ inputs.rollback-reference || 'staging-uses-latest-healthy' }}
+    steps:
+      - name: Require a complete production release record
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in SHIP_RELEASE_ID UAT_EVIDENCE ROLLBACK_REFERENCE; do
+            if [ -z "${!name:-}" ] || [[ "${!name}" == *'not-required-for-'* ]] || [[ "${!name}" == *'placeholder'* ]]; then
+              echo "Production requires a real $name value."
+              exit 1
+            fi
+          done
+
+      - name: Validate Static Web App environment contract
+        shell: bash
+        env:
+          SWA_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          for name in CONFIGURED_API_URL CONFIGURED_DEPLOYMENT_URL SWA_TOKEN; do
+            if [ -z "${!name:-}" ]; then
+              echo "Missing $name in the selected GitHub environment."
+              exit 1
+            fi
+          done
+
+      - uses: actions/checkout@v7
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: admin/package-lock.json
+
+      - name: Build static admin application
+        working-directory: admin
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm audit --audit-level=high
+          npm run check
+          rm -rf build
+          VITE_API_URL="$CONFIGURED_API_URL" npm run build
+          test -f build/index.html
+          cp staticwebapp.config.json build/staticwebapp.config.json
+
+      - name: Deploy Azure Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: upload
+          app_location: admin/build
+          skip_app_build: true
+          skip_api_build: true
+
+      - name: Post-deploy smoke check
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            status="$(curl -sS -L -o /dev/null -w '%{http_code}' "$CONFIGURED_DEPLOYMENT_URL" || true)"
+            if [ "$status" = "200" ]; then
+              echo "$CONFIGURED_DEPLOYMENT_URL returned HTTP 200."
+              exit 0
+            fi
+            [ "$attempt" = "12" ] || sleep 10
+          done
+          echo "$CONFIGURED_DEPLOYMENT_URL did not return HTTP 200."
+          exit 1
