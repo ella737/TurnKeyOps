@@ -43,8 +43,8 @@ api/scripts/rollback-production.sh \
   rollback-evidence-UTC_TIMESTAMP
 ```
 
-The script deploys both ZIPs with `az webapp deploy --clean true --restart true
---track-status false`, captures each App Service deployment JSON, computes the
+The script submits both ZIPs with `az webapp deploy --clean true --restart true
+--async true --track-status false`, captures each App Service deployment JSON, computes the
 artifact hashes, and runs `api/scripts/post-deploy-smoke.sh` as the authoritative
 readiness gate. Smoke must pass for
 both the API and web surfaces, both public tenant routes, anonymous API denial,

@@ -17,6 +17,7 @@ az webapp deploy \
   --type zip \
   --clean true \
   --restart true \
+  --async true \
   --track-status false \
   --output json
 

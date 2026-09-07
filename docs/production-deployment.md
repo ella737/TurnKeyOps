@@ -70,12 +70,11 @@ post-deployment smoke checks, and publishes deployment evidence. Production
 also requires the GitHub environment approval and explicit Ship/UAT/rollback
 dispatch inputs.
 
-Linux App Service ZIP deployment uses Azure CLI startup tracking disabled. The
-deployment command still waits for Kudu/OneDeploy to accept and finish the ZIP,
-while the repository-owned smoke script performs the authoritative readiness
-check with bounded retries. This avoids treating stale App Service worker-state
-telemetry as a failed deployment after the new container has started and is
-serving successfully.
+Linux App Service ZIP deployment submits asynchronously with Azure CLI startup
+tracking disabled. The repository-owned smoke script is the authoritative
+readiness check and waits with bounded retries for the API and web surfaces.
+This avoids Azure CLI 504 false failures when Kudu finishes a OneDeploy package
+after the CLI request has timed out.
 
 ## First activation checklist
 
