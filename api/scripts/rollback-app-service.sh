@@ -17,7 +17,7 @@ az webapp deploy \
   --type zip \
   --clean true \
   --restart true \
-  --track-status true \
+  --track-status false \
   --output json
 
 echo "Rollback artifact deployed to $resource_group/$app_name. Run post-deploy-smoke.sh before closing the incident."
