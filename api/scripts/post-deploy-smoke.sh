@@ -11,7 +11,9 @@ fi
 
 api_base="${api_base%/}"
 web_base="${web_base%/}"
-max_attempts="${SMOKE_MAX_ATTEMPTS:-36}"
+# App Service container recycling can legitimately take more than three minutes.
+# Keep the gate bounded while allowing a five-minute readiness window by default.
+max_attempts="${SMOKE_MAX_ATTEMPTS:-60}"
 
 if ! [[ "$max_attempts" =~ ^[1-9][0-9]*$ ]]; then
   echo 'SMOKE_MAX_ATTEMPTS must be a positive integer.' >&2

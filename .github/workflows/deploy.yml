@@ -80,7 +80,9 @@ jobs:
         run: |
           set -euo pipefail
           npm ci
+          rm -rf build
           npm run build
+          node scripts/verify-server-build.mjs build
           mkdir -p "$RUNNER_TEMP/web-package"
           cp -R build "$RUNNER_TEMP/web-package/build"
           cp package.json package-lock.json "$RUNNER_TEMP/web-package/"
