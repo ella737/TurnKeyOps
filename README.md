@@ -4,6 +4,8 @@ Unified TurnKeyOps monorepo for the API, admin, and client applications.
 
 Production deployment and custom-domain setup are documented in
 [`docs/production-deployment.md`](docs/production-deployment.md).
+The current immutable production handoff is recorded in
+[`docs/releases/turnkeyops-prod-580d9a6-20260907T043500Z.md`](docs/releases/turnkeyops-prod-580d9a6-20260907T043500Z.md).
 
 ## Structure
 
